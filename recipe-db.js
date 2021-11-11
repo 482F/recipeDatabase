@@ -57,19 +57,25 @@ class RecipeDb {
     await this._db.run(`
       CREATE TABLE IF NOT EXISTS entities (
         id INTEGER UNIQUE NOT NULL PRIMARY KEY,
-        name VARCHAR(200) UNIQUE NOT NULL,
+        name TEXT UNIQUE NOT NULL,
         max_stuck INTEGER
+      );`)
+    await this._db.run(`
+      CREATE TABLE IF NOT EXISTS hashes (
+        id INTEGER UNIQUE NOT NULL PRIMARY KEY,
+        hash TEXT UNIQUE NOT NULL
       );`)
     await this._db.run(`
       CREATE TABLE IF NOT EXISTS recipes (
         id INTEGER UNIQUE NOT NULL PRIMARY KEY,
+        hash_id INTEGER NOT NULL,
         product_id INTEGER NOT NULL,
         product_number INTEGER NOT NULL DEFAULT 1,
         material_id INTEGER NOT NULL,
         material_required_number INTEGER NOT NULL,
+        FOREIGN KEY(hash_id) REFERENCES hashes(id),
         FOREIGN KEY(product_id) REFERENCES entities(id),
         FOREIGN KEY(material_id) REFERENCES entities(id)
-        UNIQUE (product_id, material_id)
       );`)
   }
   close() {
