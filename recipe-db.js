@@ -34,6 +34,13 @@ async function getScriptDirPath() {
   return scriptDirPath
 }
 
+function repeatPlaceholder(placeholder, length) {
+  return Array(length)
+    .fill(0)
+    .map(() => placeholder)
+    .join(',')
+}
+
 class RecipeDb {
   constructor(dbPath) {
     this._db = createDbProxy(dbPath)
