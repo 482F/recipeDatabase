@@ -28,6 +28,17 @@ function createDbProxy(dbFile) {
   })
 }
 
+async function getScriptDirPath() {
+  const fs = require('fs')
+  const scriptPath = process.argv[1]
+  const scriptRealPath = await toAsyncCallback((c) =>
+    fs.realpath(scriptPath, c)
+  )
+  const path = require('path')
+  const scriptDirPath = path.dirname(scriptRealPath)
+  return scriptDirPath
+}
+
 async function main() {
   const db = createDbProxy('./test.sqlite3')
 
