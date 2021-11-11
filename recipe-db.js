@@ -78,6 +78,63 @@ class RecipeDb {
         FOREIGN KEY(material_id) REFERENCES entities(id)
       );`)
   }
+  async addRecipe(product, ...materials) {
+    await this.addEntities(product, ...materials)
+    const ids = await this.getEntityIdsByName(
+      product.name,
+      ...materials.map((material) => material.name)
+    )
+
+    const crypto = require('crypto')
+    const recipeText =
+      ids[product.name] +
+      ',' +
+      product.number +
+      ',' +
+      materials
+        .map((material) => ids[material.name] + ',' + material.number)
+        .join(',')
+    const recipeHash = crypto
+      .createHash('md5')
+      .update(recipeText)
+      .digest('base64')
+    try {
+      await this._db.run('INSERT INTO hashes (hash) VALUES (?)', recipeHash)
+    } catch (e) {
+      if (
+        e.toString() ===
+        'Error: SQLITE_CONSTRAINT: UNIQUE constraint failed: hashes.hash'
+      ) {
+        return false
+      }
+      throw e
+    }
+    const hashId = (
+      await this._db.get('SELECT id FROM hashes WHERE hash = ?', recipeHash)
+    ).id
+
+    const args = []
+    for (const material of materials) {
+      args.push(
+        hashId,
+        ids[product.name],
+        product.number,
+        ids[material.name],
+        material.number
+      )
+    }
+    await this._db.run(
+      `INSERT INTO recipes (
+        hash_id,
+        product_id,
+        product_number,
+        material_id,
+        material_required_number
+      ) VALUES ${repeatPlaceholder('(?, ?, ?, ?, ?)', materials.length)}`,
+      ...args
+    )
+    return true
+  }
   async addEntities(...entities) {
     const args = []
     for (const entity of entities) {
