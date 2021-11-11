@@ -39,10 +39,21 @@ async function getScriptDirPath() {
   return scriptDirPath
 }
 
-async function main() {
-  const db = createDbProxy('./test.sqlite3')
+class RecipeDb {
+  constructor(dbPath) {
+    this._db = createDbProxy(dbPath)
+  }
+  close() {
+    this._db.close()
+  }
+}
 
-  db.close()
+async function main() {
+  const dbName = process.argv[2]
+  const scriptDirPath = await getScriptDirPath()
+  const recipeDb = new RecipeDb(`${scriptDirPath}/${dbName}.sqlite3`)
+
+  recipeDb.close()
 }
 
 main()
