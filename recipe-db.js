@@ -91,6 +91,19 @@ class RecipeDb {
       ...args
     )
   }
+  async getEntityIdsByName(...names) {
+    const rawData = await this._db.all(
+      `SELECT name, id
+        FROM entities
+        WHERE name IN (${repeatPlaceholder('?', names.length)})`,
+      ...names
+    )
+    const data = {}
+    for (const { name, id } of rawData) {
+      data[name] = id
+    }
+    return data
+  }
   close() {
     this._db.close()
   }
