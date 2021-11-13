@@ -1,5 +1,14 @@
 #!/usr/bin/env node
 
+function toAsyncCallback(func) {
+  return new Promise((resolve, reject) => {
+    func((err, result) => {
+      if (err) reject(err)
+      resolve(result)
+    })
+  })
+}
+
 function createDbProxy(dbFile) {
   const sqlite3 = require('sqlite3')
   return new Proxy(new sqlite3.Database(dbFile), {
