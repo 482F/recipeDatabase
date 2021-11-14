@@ -41,6 +41,14 @@ function repeatPlaceholder(placeholder, length) {
     .join(',')
 }
 
+class Entity {
+  constructor(name, number, maxStuck) {
+    this.name = name
+    this.number = number
+    this.maxStuck = maxStuck ?? null
+  }
+}
+
 class RecipeDb {
   constructor(dbPath) {
     this._db = createDbProxy(dbPath)
