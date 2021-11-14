@@ -14,13 +14,8 @@ function createDbProxy(dbFile) {
   return new Proxy(new sqlite3.Database(dbFile), {
     get: function (db, key, receiver) {
       if (['run', 'get', 'all'].includes(key)) {
-        return (sql, ...params) =>
-          new Promise((resolve, reject) => {
-            db[key](sql, ...params, (err, result) => {
-              if (err) reject(err)
-              resolve(result)
-            })
-          })
+        return async (sql, ...params) =>
+          await toAsyncCallback((c) => db[key](sql, ...params, c))
       } else {
         return (...args) => db[key](...args)
       }
