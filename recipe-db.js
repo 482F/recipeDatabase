@@ -78,6 +78,19 @@ class RecipeDb {
         FOREIGN KEY(material_id) REFERENCES entities(id)
       );`)
   }
+  async addEntities(...entities) {
+    const args = []
+    for (const entity of entities) {
+      args.push(entity.name, entity.maxStuck)
+    }
+    await this._db.run(
+      `INSERT OR IGNORE INTO entities (name, max_stuck) VALUES ${repeatPlaceholder(
+        '(?, ?)',
+        entities.length
+      )}`,
+      ...args
+    )
+  }
   close() {
     this._db.close()
   }
